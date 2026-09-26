@@ -28,5 +28,40 @@ server.registerTool(
   },
 );
 
+const getPrompt = (path: string) =>
+  `
+Clean up the transcript in the file at ${path}
+Do not edit the words,
+only the formatting and any incorrect transcriptions.
+Turn long-form numbers to short-form:
+One hundred and twenty-three -> 123
+Add punctuation where necessary.
+Wrap any references to code in backticks.
+Include links as-is - do not modify links.
+`;
+
+server.registerPrompt(
+  "cleanTranscription",
+  {
+    description: "Clean up a transcript file",
+    argsSchema: {
+      path: z.string(),
+    },
+  },
+  async ({ path }) => {
+    return {
+      messages: [
+        {
+          role: "user",
+          content: {
+            type: "text",
+            text: getPrompt(path),
+          },
+        },
+      ],
+    };
+  },
+);
+
 const transport = new StdioServerTransport();
 await server.connect(transport);
